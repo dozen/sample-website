@@ -1,16 +1,16 @@
 package main
 
 import (
-	"github.com/jmoiron/sqlx"
 	"encoding/json"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
-	"io"
 	"strings"
 )
 
@@ -130,21 +130,21 @@ func index(w http.ResponseWriter, r *http.Request) {
 	for _, a := range as {
 		io.WriteString(w,
 			"<div>"+
-				"<h2>"+ strconv.Itoa(a.ID) + " タイトル: "+ a.Title+ "</h2>"+
-				"<div>著者: "+ a.User.Name+ "</div>"+
+				"<h2>"+strconv.Itoa(a.ID)+" タイトル: "+a.Title+"</h2>"+
+				"<div>著者: "+a.User.Name+"</div>"+
 				"<p>内容: "+
-					a.Content+
+				a.Content+
 				"</p>"+
 				"<div>ファボ: "+
-					func() string {
-						var stars []string
-						for _, s := range a.Stars {
-							stars = append(stars, s.User.Name)
-						}
-						return strings.Join(stars, ", ")
-					}()+
+				func() string {
+					var stars []string
+					for _, s := range a.Stars {
+						stars = append(stars, s.User.Name)
+					}
+					return strings.Join(stars, ", ")
+				}()+
 				"</div>"+
-			"</div>")
+				"</div>")
 	}
 }
 
@@ -183,10 +183,10 @@ func GetStars(a *Article) {
 }
 
 type User struct {
-	ID   int    `json:"id" db:"id"`
-	Name string `json:"name" db:"name"`
+	ID       int    `json:"id" db:"id"`
+	Name     string `json:"name" db:"name"`
 	Articles []Article
-	Stars []Star
+	Stars    []Star
 }
 
 type Article struct {
