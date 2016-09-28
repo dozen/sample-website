@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Driver       = "sqlite3"
+	Driver       = "mysql"
 	SQLiteFile   = "sqlite.db"
 	SQLFileDir   = "sql/"
 	DummyFileDir = "dummy/"
@@ -29,13 +29,13 @@ var (
 func init() {
 	InitializeDB()
 	Init()
-	Stmt(`SELECT * FROM articles AS a JOIN users AS u ON a.user_id = u.id LIMIT ? OFFSET ?`)
+	Stmt(`SELECT * FROM articles AS a JOIN users AS u ON a.user_id = u.id ORDER BY a.id DESC LIMIT ? OFFSET ?`)
 }
 
 func InitializeDB() {
 	var err error
 	if Driver == "mysql" {
-		db, err = sqlx.Open("mysql", "hoge")
+		db, err = sqlx.Open("mysql", "root:root@tcp(192.168.99.100:32773)/go_practice")
 	} else {
 		dbFile := SQLiteFile
 		db, err = sqlx.Open("sqlite3", dbFile)
@@ -51,9 +51,11 @@ func execSQLFile(file string) {
 		log.Fatalf(err.Error())
 	}
 
-	_, err = db.Exec(string(b))
-	if err != nil {
-		log.Fatal(err.Error())
+	for _, q := range strings.Split(string(b), "\n\n") {
+		_, err := db.Exec(q)
+		if err != nil {
+			log.Fatal("exec SQL error: ", err.Error())
+		}
 	}
 }
 
@@ -97,26 +99,31 @@ func Init() {
 		users      = []User{}
 		articles   = []Article{}
 		stars      = []Star{}
-		setUser    = Stmt(`INSERT INTO users VALUES(?, ?)`)
-		setArticle = Stmt(`INSERT INTO articles VALUES(?, ?, ?, ?)`)
-		setStar    = Stmt(`INSERT INTO stars VALUES(?, ?, ?)`)
+		setUser    = Stmt(`INSERT INTO users (name) VALUES(?)`)
+		setArticle = Stmt(`INSERT INTO articles (title, user_id, content) VALUES(?, ?, ?)`)
+		setStar    = Stmt(`INSERT INTO stars (article_id, user_id) VALUES(?, ?)`)
 	)
 
 	getDummy("users.json", &users)
 	for _, u := range users {
-		setUser.Exec(u.ID, u.Name)
+		setUser.Exec(u.Name)
 	}
 	log.Println("users set.")
 
 	getDummy("articles.json", &articles)
-	for _, a := range articles {
-		setArticle.Exec(a.ID, a.Title, a.UserID, a.Content)
+
+	for i := 0; i < 20; i++ {
+		go func() {
+			for _, a := range articles {
+				setArticle.Exec(a.Title, a.UserID, a.Content)
+			}
+			log.Println("articles set.")
+		}()
 	}
-	log.Println("articles set.")
 
 	getDummy("stars.json", &stars)
 	for _, s := range stars {
-		setStar.Exec(s.ID, s.ArticleID, s.UserID)
+		setStar.Exec(s.ArticleID, s.UserID)
 	}
 	log.Println("stars set.")
 
@@ -124,9 +131,15 @@ func Init() {
 
 func index(w http.ResponseWriter, r *http.Request) {
 	limit, _ := strconv.Atoi(r.FormValue("l"))
+	if limit < 1 {
+		limit = 10
+	}
 	offset, _ := strconv.Atoi(r.FormValue("o"))
-	as := GetArticles(limit, offset)
+	if offset < 1 {
+		offset = 0
+	}
 
+	as := GetArticles(limit, offset)
 	for _, a := range as {
 		io.WriteString(w,
 			"<div>"+
@@ -152,8 +165,7 @@ func GetArticles(limit, offset int) []Article {
 	var (
 		articles = []Article{}
 	)
-	//AS a JOIN users AS u ON a.user_id = u.id
-	getArticles := Stmt(`SELECT * FROM articles AS a JOIN users AS u ON a.user_id=u.id LIMIT ? OFFSET ?`)
+	getArticles := Stmt(`SELECT a.*, u.* FROM (SELECT a.id FROM articles AS a ORDER BY a.id DESC LIMIT ? OFFSET ?) AS a1 JOIN articles AS a ON a.id=a1.id JOIN users AS u ON a.user_id=u.id;`)
 
 	r, err := getArticles.Query(limit, offset)
 	if err != nil {
