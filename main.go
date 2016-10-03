@@ -150,7 +150,7 @@ func initialize(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("favs set.")
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10000; i++ {
 		setFollowing.Exec(rand.Intn(99)+1, rand.Intn(99)+1)
 	}
 	log.Println("followings set.")
