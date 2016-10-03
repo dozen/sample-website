@@ -125,12 +125,6 @@ func initialize(w http.ResponseWriter, r *http.Request) {
 		setFavorite  = stmt(`INSERT INTO favorites (article_id, user_id) VALUES(?, ?)`)
 		setFollowing = stmt(`INSERT INTO followings (from_id, to_id) VALUES(?, ?)`)
 	)
-	defer func() {
-		setUser.Close()
-		setArticle.Close()
-		setFavorite.Close()
-		setFollowing.Close()
-	}()
 
 	GetDummy("users.json", &users)
 	for _, u := range users {
@@ -150,9 +144,18 @@ func initialize(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("favs set.")
 
-	for i := 0; i < 10000; i++ {
-		setFollowing.Exec(rand.Intn(99)+1, rand.Intn(99)+1)
+	var fs = [100][100]int{{}}
+	for i := 0; i < 1000; i++ {
+		fs[rand.Intn(99)][rand.Intn(99)] = 1;
 	}
+	for i, v := range fs {
+		for j, h := range v {
+			if h == 1 {
+				setFollowing.Exec(i + 1, j + 1)
+			}
+		}
+	}
+
 	log.Println("followings set.")
 
 	io.WriteString(w, "done")
