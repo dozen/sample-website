@@ -5,7 +5,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -43,6 +42,9 @@ var (
 	store = sessions.NewFilesystemStore("sess", []byte(ServiceName))
 
 	tpl = template.Must(template.New("tmpl").Funcs(template.FuncMap{
+		"title": func() string {
+			return ServiceName
+		},
 		"showFavs": func(f []Favorite) string {
 			var favorites []string
 			for _, s := range f {
@@ -126,19 +128,19 @@ func initialize(w http.ResponseWriter, r *http.Request) {
 		setFollowing = stmt(`INSERT INTO followings (from_id, to_id) VALUES(?, ?)`)
 	)
 
-	GetDummy("users.json", &users)
+	ReadJson("users.json", &users)
 	for _, u := range users {
 		setUser.Exec(u.Name)
 	}
 	log.Println("users set.")
 
-	GetDummy("articles.json", &articles)
+	ReadJson("articles.json", &articles)
 	for _, a := range articles {
 		setArticle.Exec(a.Title, a.UserID, a.Content)
 	}
 	log.Println("articles set.")
 
-	GetDummy("favorites.json", &favorites)
+	ReadJson("favorites.json", &favorites)
 	for _, s := range favorites {
 		setFavorite.Exec(s.ArticleID, s.UserID)
 	}
@@ -175,11 +177,12 @@ func ExecSQLFile(file string) {
 	}
 }
 
-func GetDummy(file string, obj interface{}) error {
+func ReadJson(file string, obj interface{}) error {
 	fh, err := os.Open(DummyFileDir + file)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
+	defer fh.Close()
 
 	d := json.NewDecoder(fh)
 	return d.Decode(obj)
