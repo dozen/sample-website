@@ -148,12 +148,12 @@ func initialize(w http.ResponseWriter, r *http.Request) {
 
 	var fs = [100][100]int{{}}
 	for i := 0; i < 1000; i++ {
-		fs[rand.Intn(99)][rand.Intn(99)] = 1;
+		fs[rand.Intn(99)][rand.Intn(99)] = 1
 	}
 	for i, v := range fs {
 		for j, h := range v {
 			if h == 1 {
-				setFollowing.Exec(i + 1, j + 1)
+				setFollowing.Exec(i+1, j+1)
 			}
 		}
 	}
