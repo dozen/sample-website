@@ -159,7 +159,6 @@ func initialize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("followings set.")
-
 	io.WriteString(w, "done")
 }
 
