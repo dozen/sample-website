@@ -1,0 +1,32 @@
+{{define "user"}}
+<div>
+    <h2>{{.User.Name}}</h2>
+    <h3>フォロー</h3>
+    <div>
+        <ul>
+            {{range getFollowings (.User)}}<li><a href="/user/{{.To.ID}}">{{.To.Name}}</a></li>{{end}}
+        </ul>
+    </div>
+    <h3>フォローワー</h3>
+    <div>
+        <ul>
+            {{range getFollowers (.User)}}<li><a href="/user/{{.From.ID}}">{{.From.Name}}</a></li>{{end}}
+        </ul>
+    </div>
+    <h3>記事</h3>
+    <div>
+        {{range .User.Articles}}
+        <div>
+            <h2>{{.Title}}</h2>
+            <div>{{.User.Name}}</div>
+            <p>{{.Content}}</p>
+            <div>
+                <ul>
+                    {{range .Favorites}}<li><a href="/user/{{.User.ID}}">{{.User.Name}}</a></li>{{end}}
+                </ul>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</div>
+{{end}}

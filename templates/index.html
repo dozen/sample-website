@@ -1,0 +1,14 @@
+{{define "index"}}
+    {{range .Articles}}
+    <div>
+        <h2>{{.Title}}</h2>
+        <div><a href="/user/{{.User.ID}}">{{.User.Name}}</a></div>
+        <p>{{.Content}}</p>
+        <div>
+            <ul>
+                {{range .Favorites}}<li><a href="/user/{{.User.ID}}">{{.User.Name}}</a></li>{{end}}
+            </ul>
+        </div>
+    </div>
+    {{end}}
+{{end}}
