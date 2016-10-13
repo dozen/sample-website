@@ -1,0 +1,10 @@
+{{define "login"}}
+{{template "header" .}}
+<div id="login">
+    <form method="post" target="/login">
+        <input type="name" name="name">
+        <input type="password" name="password">
+        <button type="submit">login</button>
+    </form>
+</div>
+{{end}}

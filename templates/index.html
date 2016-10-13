@@ -1,6 +1,7 @@
 {{define "index"}}
+{{template "header" .}}
 {{range .Articles}}
-<div>
+<div id="index">
     <h2>{{.Title}}</h2>
     <div><a href="/user/{{.User.ID}}">{{.User.Name}}</a></div>
     <p>{{.Content}}</p>

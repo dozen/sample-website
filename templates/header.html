@@ -1,0 +1,19 @@
+{{define "header"}}<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <script src="/js/main.js"></script>
+</head>
+<body>
+<nav>
+    <a href="/">HOME</a>
+    {{$user := getUser .Session}}
+    {{if $user.Name }}
+        <a href="/logout?token={{getToken .Session}}">logout</a>
+    {{else}}
+        <a href="/login">login</a>
+    {{end}}
+</nav>
+{{end}}

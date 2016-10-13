@@ -1,16 +1,17 @@
 {{define "user"}}
+{{template "header" .}}
 <div>
     <h2>{{.User.Name}}</h2>
     <h3>フォロー</h3>
     <div>
         <ul>
-            {{range getFollowings (.User)}}<li><a href="/user/{{.To.ID}}">{{.To.Name}}</a></li>{{end}}
+            {{range .User.Followings}}<li><a href="/user/{{.ID}}">{{.Name}}</a></li>{{end}}
         </ul>
     </div>
     <h3>フォローワー</h3>
     <div>
         <ul>
-            {{range getFollowers (.User)}}<li><a href="/user/{{.From.ID}}">{{.From.Name}}</a></li>{{end}}
+            {{range .User.Followers}}<li><a href="/user/{{.ID}}">{{.Name}}</a></li>{{end}}
         </ul>
     </div>
     <h3>記事</h3>
